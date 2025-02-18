@@ -1,29 +1,31 @@
 const express = require("express");
 const dotenv = require("dotenv");
 dotenv.config();
+   const TelegramBot = require('node-telegram-bot-api');
 
-const app = express();
-app.use(express.json());
+   const app = express();
+   const port = process.env.PORT || 3000;
 
-const port = process.env.PORT || 8080;
-app.listen(port, () => {
-  console.log(`App is listening on port ${port}`);
-});
+   // Ganti dengan token bot Anda
+   const token = '7908620487:AAF4g43C8WDQ_MPr2Eo9Dg2XYusyQbvMS6U';
+   const bot = new TelegramBot(token, { polling: true });
 
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send("Something broke!");
-});
+   // Handle /start command
+   bot.onText(/\/start/, (msg) => {
+     const chatId = msg.chat.id;
+     bot.sendMessage(chatId, 'Hello! I am your Telegram bot.');
+   });
 
-app.get("/:name", (req, res) => {
-  const { name } = req.params;
-  res.status(200).send(`Name: ${name}`);
-});
+   // Handle /echo command
+   bot.onText(/\/echo (.+)/, (msg, match) => {
+     const chatId = msg.chat.id;
+     const resp = match[1]; // Pesan yang dikirim oleh pengguna
+     bot.sendMessage(chatId, `You said: ${resp}`);
+   });
 
-app.get("/", (req, res) => {
-  res.send(`App is working fine`);
-});
+   // Start the server
+   app.listen(port, () => {
+     console.log(`Server is running on port ${port}`);
+   });
 
-app.use((req, res, next) => {
-  res.status(404).send("Sorry can't find that!");
-});
+   module.exports = app;
